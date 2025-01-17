@@ -1,0 +1,7 @@
+
+<code>
+    {{messageService.data$ | async | json}}
+</code>
+
+<button (click)="messageService.read()">Refresh</button>
+<button (click)="messageService.create({time:0,text:'Default'})">Create</button>
