@@ -24,7 +24,7 @@
         [(ngModel)]="userName" 
         (keyup.enter)="userName && userService.create({name:userName})">
 </fieldset>
-<h2>{{ userService.events$ | async }}</h2>
+<h2>{{ userService.events$ | async  | translate:'fr' }}</h2>
 <fieldset>
     <legend>List of user</legend>
     <ul>

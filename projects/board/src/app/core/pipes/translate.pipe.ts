@@ -2,10 +2,11 @@ import { Pipe, PipeTransform } from '@angular/core';
 
 @Pipe({
   name: 'translate',
+  standalone:false
 })
 export class TranslatePipe implements PipeTransform {
 
-  transform(value: string, lang = 'en'): unknown {
+  transform(value: string | null, lang = 'en'): unknown {
     switch (value) {
       case "UserService:READ DONE":
         return lang == 'fr' ? "Liste mise à jour" : "User list has been refreshed";
