@@ -3,6 +3,15 @@ import { ReactiveService, Response, Unique } from "../interfaces/reactive-servic
 import { HttpClient } from "@angular/common/http";
 import { inject } from "@angular/core";
 
+/**
+ * Provides standard HTTP Processing
+ * 
+ * override "create,read,update,delete" methods to change HTTP behaviour.
+ * 
+ * override "process*" methods to change Data manipulation.
+ * 
+ * use "events$" to brocast string event messages.
+ */
 export abstract class ReactiveBase<T extends Unique> implements ReactiveService<T> {
 
     private http = inject(HttpClient);
@@ -31,7 +40,8 @@ export abstract class ReactiveBase<T extends Unique> implements ReactiveService<
                     return res$.complete();
                 }
                     
-                this._data.next([payload as T, ...this._data.value]);
+                this.processCreate(payload as T);
+
                 res$.next({ msg: 'DONE', data: payload });
                 res$.complete();
                 this.events$.next('CREATE DONE');
@@ -39,6 +49,10 @@ export abstract class ReactiveBase<T extends Unique> implements ReactiveService<
             });
 
         return res$;
+    }
+
+    protected processCreate( payload:T){
+        this._data.next([payload, ...this._data.value]);
     }
 
     read(id?: Unique): Observable<Response> {
@@ -56,7 +70,7 @@ export abstract class ReactiveBase<T extends Unique> implements ReactiveService<
                     return res$.complete();
                 }
 
-                this._data.next(payload as T[]);
+                this.processRead(payload as T[])
 
                 res$.next({ msg: 'DONE', data: payload });
                 res$.complete();
@@ -64,6 +78,9 @@ export abstract class ReactiveBase<T extends Unique> implements ReactiveService<
             });
 
         return res$;
+    }
+    protected processRead( payload:T[]){
+        this._data.next(payload);
     }
 
     update(target: T, data: Partial<Omit<T, "id">>): Observable<Response> {
@@ -81,9 +98,7 @@ export abstract class ReactiveBase<T extends Unique> implements ReactiveService<
                     return res$.complete();
                 }
 
-                this._data.next(
-                    this._data.value.map(item => item.id == (payload as T).id ? payload : item) as T[]
-                );
+                this.processUpdate( payload as T);
 
                 res$.next({ msg: 'DONE', data: payload });
                 res$.complete();
@@ -92,6 +107,13 @@ export abstract class ReactiveBase<T extends Unique> implements ReactiveService<
 
         return res$;
     }
+
+    protected processUpdate( payload:T ){
+        this._data.next(
+            this._data.value.map(item => item.id == (payload as T).id ? payload : item) as T[]
+        );
+    }
+
     delete(target: T): Observable<Response> {
         const res$ = new BehaviorSubject<Response>({ msg: 'PROCESSING' });
 
@@ -106,9 +128,7 @@ export abstract class ReactiveBase<T extends Unique> implements ReactiveService<
                     return res$.complete();
                 }
 
-                this._data.next(
-                    this._data.value.filter(item => item.id != (payload as T).id) as T[]
-                );
+                this.processDelete( payload as T );
 
                 res$.next({ msg: 'DONE', data: payload });
                 res$.complete();
@@ -116,5 +136,11 @@ export abstract class ReactiveBase<T extends Unique> implements ReactiveService<
             });
 
         return res$;
+    }
+
+    protected processDelete( payload:T ){
+        this._data.next(
+            this._data.value.filter(item => item.id != (payload as T).id) as T[]
+        );
     }
 }

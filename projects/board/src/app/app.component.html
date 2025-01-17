@@ -1,7 +1,37 @@
+<code>
+    {{notificationService.data$ | async | json}}
+</code>
+<hr>
+
+<code>
+    {{messageService.events$ | async | json}}
+</code>
+<hr>
 
 <code>
     {{messageService.data$ | async | json}}
 </code>
+<hr>
 
 <button (click)="messageService.read()">Refresh</button>
 <button (click)="messageService.create({time:0,text:'Default'})">Create</button>
+
+<hr>
+
+<fieldset>
+    <legend>Create a user</legend>
+    <input 
+        [(ngModel)]="userName" 
+        (keyup.enter)="userName && userService.create({name:userName})">
+</fieldset>
+<h2>{{ userService.events$ | async }}</h2>
+<fieldset>
+    <legend>List of user</legend>
+    <ul>
+        @for (user of userService.data$ | async; track user.id) {
+            <li>
+                {{user.name}} <button (click)="userService.delete(user)">X</button>
+            </li>
+        }
+    </ul>
+</fieldset>
